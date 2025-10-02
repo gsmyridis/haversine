@@ -17,6 +17,7 @@ pub(crate) enum ParsingError {
     InvalidIdent,
     MissingColon,
     TrailingComma,
+    InvalidFormat,
     Number(String),
     InvalidKeyType,
     ReachedEOF(&'static str),
@@ -54,8 +55,16 @@ impl<'a> Cursor<'a> {
         }
     }
 
+    pub(crate) fn parse(&mut self) -> Result<Option<Value>, ParsingError> {
+        let value = self.next_value();
+        match self.bump() {
+            Some(_) => Err(ParsingError::InvalidFormat),
+            None => value,
+        }
+    }
+
     /// It produces the next value.
-    pub fn next_value(&mut self) -> Result<Option<Value>, ParsingError> {
+    fn next_value(&mut self) -> Result<Option<Value>, ParsingError> {
         self.eat_whitespace();
         let first_char = match self.bump() {
             Some(b) => b,
@@ -69,7 +78,7 @@ impl<'a> Cursor<'a> {
             STRING_START => self.next_string().map(|string| Some(Value::String(string))),
             OPEN_BRACKET => self.next_array().map(|array| Some(Value::Array(array))),
             OPEN_BRACE => self.next_object().map(|obj| Some(Value::Object(obj))),
-            '0'..'9' | '-' => self
+            '0'..='9' | '-' => self
                 .next_number(first_char)
                 .map(|num| Some(Value::Number(num))),
             _ => Err(ParsingError::StartingCharacter(first_char.into())),

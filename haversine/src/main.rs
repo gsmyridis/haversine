@@ -7,9 +7,13 @@ use parse::Cursor;
 fn main() {
     let file_name = "../gendata/pairs.json";
     let mut file = File::open(file_name).expect("Failed to open file");
-    let mut buffer = Vec::new();
-    let n = file.read_to_end(&mut buffer).expect("Failed to read file");
-    println!("Read {n} bytes: {buffer:?}");
+    let mut string = String::new();
+    let _n = file
+        .read_to_string(&mut string)
+        .expect("Failed to read file");
+
+    let json = Cursor::new(&string).parse().unwrap();
+    println!("{json:?}");
 
     // let mut cursor = Cursor::new(buffer.iter());
     // cursor.next_value();
