@@ -1,0 +1,9 @@
+**/.DS_Store
+
+# Rust
+**/target
+
+# Python
+**/egg-info
+**/__pycache__/
+**/.venv
