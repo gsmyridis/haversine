@@ -35,6 +35,15 @@ pub(crate) enum Value {
     Object(HashMap<String, Value>),
 }
 
+impl Value {
+    pub(crate) fn get_number(&self) -> f64 {
+        match self {
+            Self::Number(num) => *num,
+            _ => panic!("Cannot extract number."),
+        }
+    }
+}
+
 /// Parses a file to a JSON object.
 /// For a simple introduction to the valid JSON formats
 /// visit: https://www.json.org/json-en.html
