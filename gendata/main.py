@@ -190,10 +190,10 @@ def generate(pairs: int, radius: float, clusters: int, output: str):
     result = {
         "pairs": [
             {
-                "phi_0": xs[0],
-                "theta_0": ys[0],
-                "phi_1": xs[1],
-                "theta_1": ys[1],
+                "x0": xs[0],
+                "y0": ys[0],
+                "x1": xs[1],
+                "y1": ys[1],
             }
             for xs, ys in zip(phis, thetas)
         ],
@@ -222,10 +222,10 @@ def calculate(path: str):
     thetas_0, thetas_1 = np.zeros(n_pairs), np.zeros(n_pairs)
 
     for i in range(n_pairs):
-        phis_0[i] = in_file["pairs"][i]["phi_0"]
-        phis_1[i] = in_file["pairs"][i]["phi_1"]
-        thetas_0[i] = in_file["pairs"][i]["theta_0"]
-        thetas_1[i] = in_file["pairs"][i]["theta_1"]
+        phis_0[i] = in_file["pairs"][i]["x0"]
+        phis_1[i] = in_file["pairs"][i]["x1"]
+        thetas_0[i] = in_file["pairs"][i]["y0"]
+        thetas_1[i] = in_file["pairs"][i]["y1"]
 
     load_end_time = time.time()
 
