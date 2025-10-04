@@ -3,7 +3,7 @@ use std::io::Read;
 use std::time::Instant;
 
 mod parse;
-use parse::{Cursor, Value};
+use parse::{Parser, Value};
 
 fn degrees_to_radians(angle: f64) -> f64 {
     angle * std::f64::consts::PI / 180.0
@@ -40,7 +40,7 @@ fn main() {
         .read_to_string(&mut string)
         .expect("Failed to read file");
 
-    let json = match Cursor::new(&string).parse().unwrap().unwrap() {
+    let json = match Parser::new(&string).parse().unwrap().unwrap() {
         Value::Object(object) => object,
         _ => panic!("Invalid pairs file"),
     };
@@ -52,7 +52,11 @@ fn main() {
         _ => panic!("Invalid pairs file"),
     };
 
-    let radius = json.get("radius").expect("Expected to exist").get_number();
+    let radius = json
+        .get("radius")
+        .expect("Expected to exist")
+        .try_into()
+        .unwrap();
 
     let pairs = match json.get("pairs").expect("Expected to exist") {
         Value::Array(array) => array,
@@ -68,10 +72,27 @@ fn main() {
     for pair in pairs {
         let (phi_0, theta_0, phi_1, theta_1) = match pair {
             Value::Object(obj) => {
-                let phi_0 = obj.get("phi_0").expect("Expected to exist").get_number();
-                let phi_1 = obj.get("phi_1").expect("Expected to exist").get_number();
-                let theta_0 = obj.get("theta_0").expect("Expected to exist").get_number();
-                let theta_1 = obj.get("theta_1").expect("Expected to exist").get_number();
+                let phi_0 = obj
+                    .get("x0")
+                    .expect("Expected to exist")
+                    .try_into()
+                    .expect("Is number");
+                let phi_1 = obj
+                    .get("x1")
+                    .expect("Expected to exist")
+                    .try_into()
+                    .expect("Is number");
+                let theta_0 = obj
+                    .get("y0")
+                    .expect("Expected to exist")
+                    .try_into()
+                    .expect("Is number");
+                let theta_1 = obj
+                    .get("y1")
+                    .expect("Expected to exist")
+                    .try_into()
+                    .expect("Is number");
+
                 (phi_0, theta_0, phi_1, theta_1)
             }
             _ => panic!("Invalid pair"),
