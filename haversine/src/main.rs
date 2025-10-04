@@ -73,22 +73,22 @@ fn main() {
         let (phi_0, theta_0, phi_1, theta_1) = match pair {
             Value::Object(obj) => {
                 let phi_0 = obj
-                    .get("phi_0")
+                    .get("x0")
                     .expect("Expected to exist")
                     .try_into()
                     .expect("Is number");
                 let phi_1 = obj
-                    .get("phi_1")
+                    .get("x1")
                     .expect("Expected to exist")
                     .try_into()
                     .expect("Is number");
                 let theta_0 = obj
-                    .get("theta_0")
+                    .get("y0")
                     .expect("Expected to exist")
                     .try_into()
                     .expect("Is number");
                 let theta_1 = obj
-                    .get("theta_1")
+                    .get("y1")
                     .expect("Expected to exist")
                     .try_into()
                     .expect("Is number");
