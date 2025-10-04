@@ -7,8 +7,6 @@ const EOF_CHAR: char = '\0';
 pub(crate) enum Token {
     /// End of file
     Eof,
-    /// Quote `"`
-    Quote,
     /// Open brace `{`
     OpenBrace,
     /// Close brace `}`

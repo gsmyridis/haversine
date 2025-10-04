@@ -10,7 +10,6 @@ pub(crate) enum ParsingError {
     ReachedEOF(Token),
     StartingToken(Token),
     Tokenize(TokenizeError),
-    TryFromToken(Token),
     TokenAfterValue(Token),
     DuplicateObjectKey(String),
 }
@@ -115,7 +114,7 @@ impl<'a> Parser<'a> {
             match self.tokenizer.next_token()? {
                 Token::Colon => {}
                 Token::Eof => return Err(ParsingError::ReachedEOF(Token::OpenBrace)),
-                tok => return Err(ParsingError::MissingColon),
+                _ => return Err(ParsingError::MissingColon),
             }
 
             let value = self.parse_value()?.expect("Guaranteed to not be EOF");

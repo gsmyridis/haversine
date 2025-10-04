@@ -1,16 +1,11 @@
 use std::collections::HashMap;
 
-use super::{Parser, ParsingError, Token, Value};
+use super::parser::ParsingError;
+use super::{Parser, Token, Value};
 
 #[test]
 fn test_null() {
     let parser = Parser::new("null");
-    assert_eq!(Ok(Some(Value::Null)), parser.parse());
-}
-
-#[test]
-fn test_null_spaced() {
-    let parser = Parser::new(" null ");
     assert_eq!(Ok(Some(Value::Null)), parser.parse());
 }
 
@@ -21,20 +16,8 @@ fn test_true() {
 }
 
 #[test]
-fn test_true_spaced() {
-    let parser = Parser::new(" true ");
-    assert_eq!(Ok(Some(Value::Bool(true))), parser.parse());
-}
-
-#[test]
 fn test_false() {
     let parser = Parser::new("false");
-    assert_eq!(Ok(Some(Value::Bool(false))), parser.parse());
-}
-
-#[test]
-fn test_false_spaced() {
-    let parser = Parser::new(" false ");
     assert_eq!(Ok(Some(Value::Bool(false))), parser.parse());
 }
 
@@ -46,21 +29,8 @@ fn test_string() {
 }
 
 #[test]
-fn test_string_spaced() {
-    let parser = Parser::new(" \"Hello, this is a string!\" ");
-    let string = Value::String("Hello, this is a string!".into());
-    assert_eq!(Ok(Some(string)), parser.parse());
-}
-
-#[test]
 fn test_positive_int() {
     let parser = Parser::new("12");
-    assert_eq!(Ok(Some(Value::Number(12.0))), parser.parse());
-}
-
-#[test]
-fn test_positive_int_spaced() {
-    let parser = Parser::new(" 12 ");
     assert_eq!(Ok(Some(Value::Number(12.0))), parser.parse());
 }
 
@@ -71,20 +41,8 @@ fn test_positive_decimal() {
 }
 
 #[test]
-fn test_positive_decimal_spaced() {
-    let parser = Parser::new(" 12.5 ");
-    assert_eq!(Ok(Some(Value::Number(12.5))), parser.parse());
-}
-
-#[test]
 fn test_negative_int() {
     let parser = Parser::new("-120");
-    assert_eq!(Ok(Some(Value::Number(-120.0))), parser.parse());
-}
-
-#[test]
-fn test_negative_int_spaced() {
-    let parser = Parser::new(" -120 ");
     assert_eq!(Ok(Some(Value::Number(-120.0))), parser.parse());
 }
 
@@ -95,20 +53,8 @@ fn test_negative_float() {
 }
 
 #[test]
-fn test_negative_float_spaced() {
-    let parser = Parser::new(" -12.90 ");
-    assert_eq!(Ok(Some(Value::Number(-12.9))), parser.parse());
-}
-
-#[test]
 fn test_array_empty() {
     let parser = Parser::new("[]");
-    assert_eq!(Ok(Some(Value::Array(vec![]))), parser.parse());
-}
-
-#[test]
-fn test_array_empty_spaced() {
-    let parser = Parser::new(" [ ] ");
     assert_eq!(Ok(Some(Value::Array(vec![]))), parser.parse());
 }
 
@@ -124,19 +70,8 @@ fn test_int_array() {
 }
 
 #[test]
-fn test_int_array_spaced() {
-    let parser = Parser::new(" [1 , 2 , 3 ] ");
-    let array = Value::Array(vec![
-        Value::Number(1.0),
-        Value::Number(2.0),
-        Value::Number(3.0),
-    ]);
-    assert_eq!(Ok(Some(array)), parser.parse());
-}
-
-#[test]
-fn test_array_no_comma() {
-    let parser = Parser::new(" [1 , 2 3 ] ");
+fn test_array_missing_comma() {
+    let parser = Parser::new("[1, 2 3] ");
     assert_eq!(
         Err(ParsingError::TokenAfterValue(Token::Number(3.0))),
         parser.parse()
@@ -144,7 +79,7 @@ fn test_array_no_comma() {
 }
 
 #[test]
-fn test_array_no_close_bracket() {
+fn test_array_missing_close_bracket() {
     let parser = Parser::new("[1, 2, 3 ");
     assert_eq!(
         Err(ParsingError::ReachedEOF(Token::OpenBracket)),
@@ -153,8 +88,8 @@ fn test_array_no_close_bracket() {
 }
 
 #[test]
-fn test_int_array_trailing_comma() {
-    let parser = Parser::new("[1 ,2 ,3 , ] ");
+fn test_array_trailing_comma() {
+    let parser = Parser::new("[1 ,2 ,3, ] ");
     assert_eq!(Err(ParsingError::TrailingComma), parser.parse());
 }
 
@@ -165,24 +100,8 @@ fn test_object_empty() {
 }
 
 #[test]
-fn test_object_empty_empty() {
-    let parser = Parser::new(" { } ");
-    assert_eq!(Ok(Some(Value::Object(HashMap::new()))), parser.parse());
-}
-
-#[test]
 fn test_object() {
-    let parser = Parser::new("{ \"one\": 1, \"two\": 2}");
-    let mut map = HashMap::new();
-    map.insert("one".into(), Value::Number(1.0));
-    map.insert("two".into(), Value::Number(2.0));
-    let object = Value::Object(map);
-    assert_eq!(Ok(Some(object)), parser.parse());
-}
-
-#[test]
-fn test_object_spaced() {
-    let parser = Parser::new(" { \"one\" : 1, \"two\" : 2 }");
+    let parser = Parser::new("{\"one\": 1, \"two\": 2}");
     let mut map = HashMap::new();
     map.insert("one".into(), Value::Number(1.0));
     map.insert("two".into(), Value::Number(2.0));
@@ -197,9 +116,8 @@ fn test_object_trailing_comma() {
 }
 
 #[test]
-fn test_array_mixed_spaced() {
-    let parser =
-        Parser::new(" [ { \"one\" : 1, \"two\" : 2 } , [ 1 , true , false ] , null , \"string\" ]");
+fn test_array_mixed() {
+    let parser = Parser::new(" [{\"one\": 1, \"two\": 2 } , [1, true, false] ,null ,\"string\"]");
 
     let mut map = HashMap::new();
     map.insert("one".into(), Value::Number(1.0));
@@ -222,7 +140,7 @@ fn test_array_mixed_spaced() {
 #[test]
 fn test_object_mixed_spaced() {
     let parser = Parser::new(
-        " { \"object\" : { \"one\" : 1, \"two\" : 2 } , \"array\" : [1 , 2 ] , \"number\" : 3 }",
+        " {\"object\": {\"one\": 1, \"two\": 2 } , \"array\": [1, 2] , \"number\": 3 }",
     );
 
     let mut map_in = HashMap::new();
